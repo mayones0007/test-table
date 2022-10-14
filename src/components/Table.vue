@@ -1,4 +1,5 @@
 <template>
+  <Filters @setTablePage="setPage(1)"/>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -14,7 +15,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in filteredData" :key="item">
+      <tr v-for="item in sortedData" :key="item">
         <td v-for="column in columns" :key="column">
           <div>{{item[column.name]}}</div>
         </td> 
@@ -28,7 +29,7 @@
           <a class="page-link" @click="changePage(-1)">&laquo;</a>
         </li>
         <li v-for="page in pagesCount" :key="page" class="page-item" :class="{'active': this.page === page}">
-          <a class="page-link" @click="this.page = page">{{page}}</a>
+          <a class="page-link" @click="setPage(page)">{{page}}</a>
         </li>
         <li class="page-item" :class="{'disabled': this.page  >= pagesCount}">
           <a class="page-link" @click="changePage(1)">&raquo;</a>
@@ -46,15 +47,20 @@
 
 <script>
 import { columns } from "../tableConfig"
+import Filters from './Filters.vue'
+
 
 export default {
+  components: {
+    Filters,
+  },
   data() {
     return {
       columns,
-      sortColumn: '',
       reverse: false,
       page: 1,
       countOnPage: 10,
+      sortColumn: '',
     }
   },
   name: 'Table',
@@ -64,21 +70,28 @@ export default {
     },
     pagesCount() {
       return Math.ceil(this.$store.state.filteredData.length / this.countOnPage)
+    },
+    sortedData() {
+      const sortedData = this.reverse
+        ? [...this.$store.state.filteredData].sort((a, b) => a[this.sortColumn] > b[this.sortColumn] ? 1 : -1)
+        : [...this.$store.state.filteredData].sort((a, b) => a[this.sortColumn] < b[this.sortColumn] ? 1 : -1)
+    
+      return sortedData.slice((this.page - 1) * this.countOnPage, this.page * this.countOnPage)
     }
   },
   methods: {
     sortFunc(column) {
       if (column !== 'date') {
         if (this.sortColumn === column) {
-          this.$store.commit('setFilteredData', this.$store.state.filteredData.reverse())
           this.reverse = !this.reverse
           return
         }
-        this.$store.commit('setFilteredData', this.$store.state.filteredData.sort((a, b) => a[column] < b[column] ? 1 : -1))
         this.sortColumn = column
         this.reverse = false
-        this.page = 1
       }
+    },
+    setPage(n) {
+      this.page = n
     },
     changePage(n) {
         this.page = this.page + n

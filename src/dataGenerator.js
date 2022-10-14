@@ -1,13 +1,13 @@
 function getRandomValueFromArray(values) {
-  const random = Math.floor(Math.random() * Math.floor(values.length));
+  const random = Math.floor(Math.random() * Math.floor(values.length))
   return values[random]
 }
 
 function getRandomDate() {
-  const date = new Date();
-  const random = Math.floor(Math.random() * 10);
-  date.setDate(date.getDate() + random);
-  return date.toLocaleDateString();
+  const date = new Date()
+  const random = Math.floor(Math.random() * 10)
+  date.setDate(date.getDate() + random)
+  return date.toLocaleDateString()
 }
 
 export function generateData() {

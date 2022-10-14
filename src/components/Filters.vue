@@ -2,22 +2,19 @@
   <div class="filters">
     <div class="input-group">
       <label class="input-group-text" for="column">Колонка</label>
-      <select class="form-select" id="column" v-model="filter.column">
-        <option v-for="column in columns" :key="column.name" :value="column.name">{{column.translation}}</option>
+      <select class="form-select" id="column" v-model="column">
+        <option v-for="column in columns" :key="column" :value="column">{{column.translation}}</option>
       </select>
     </div>
     <div class="input-group">
       <label class="input-group-text" for="condition">Условие</label>
-      <select class="form-select" id="condition" v-model="filter.condition">
-        <option>равно</option>
-        <option v-if="filter.column !== 'date'">содержит</option>
-        <option v-if="filter.column !== 'name'">больше</option>
-        <option v-if="filter.column !== 'name'">меньше</option>
+      <select class="form-select" id="condition" v-model="filter.filterFunc">
+        <option v-for="condition in conditions" :key="condition.name" :value="condition.filterFunc">{{condition.name}}</option>
       </select>
     </div>
     <div class="input-group">
       <label class="input-group-text" for="value">Значение</label>
-      <input v-if="filter.column === 'date'" class="form-control" type="date" id="value" @change="changeFilterDate">
+      <input v-if="column.name === 'date'" class="form-control" type="date" id="value" @change="changeFilterDate">
       <input v-else class="form-control" id="value" v-model="filter.value">
     </div>
     <button class="btn btn-outline-success" :disabled="setFiltersButtonIsDisabled" @click="filterFunc">Фильтровать</button>
@@ -27,17 +24,24 @@
 
 <script>
 import { columns } from "../tableConfig"
+import { filters } from "../filtersConfig"
+
 export default {
   data() {
     return {
+      filters,
       filter: {},
+      column: {},
       columns,
     }
   },
   name: 'Filters',
   computed: {
     setFiltersButtonIsDisabled() {
-      return !this.filter.column || !this.filter.condition || !this.filter.value
+      return !this.column || !this.filter.filterFunc || !this.filter.value
+    },
+    conditions() {
+      return this.filters.filter((filter) => filter.typeOfData.includes(this.column.type) && filter)
     }
   },
   methods: {
@@ -45,26 +49,15 @@ export default {
       this.filter.value = e.target.value.split('-').reverse().join('/')
     },
     filterFunc() {
-      const column = this.filter.column
+      const column = this.column.name
       const value = this.filter.value
-      switch (this.filter.condition) {
-        case 'равно':
-          this.$store.commit('setFilteredData', this.$store.state.data.filter(item => item[column] == value))
-          break
-        case 'содержит':
-          this.$store.commit('setFilteredData', this.$store.state.data.filter(item => item[column].toString().toLowerCase().includes(value.toLowerCase())))
-          break
-        case 'больше':
-          this.$store.commit('setFilteredData', this.$store.state.data.filter(item => item[column] > value))
-          break
-        case 'меньше':
-          this.$store.commit('setFilteredData', this.$store.state.data.filter(item => item[column] < value))
-          break
-      }
+      this.$store.commit('setFilteredData', this.filter.filterFunc(this.$store.state.data, column, value))
+      this.$emit('setTablePage')
     },
     resetFilters() {
       this.$store.commit('resetFilteredData')
       this.filter = {}
+      this.column = {}
     },
   },
 }
