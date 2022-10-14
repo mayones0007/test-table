@@ -58,8 +58,6 @@ export default {
     }
   },
   name: 'Table',
-  props: {
-  },
   computed: {
     filteredData(){
       return this.$store.state.filteredData.slice((this.page - 1) * this.countOnPage, this.page * this.countOnPage)

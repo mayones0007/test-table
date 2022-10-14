@@ -9,7 +9,7 @@ export const columns = [
   },
   {
     name: 'count',
-    translation: 'Колличество',
+    translation: 'Количество',
   },
   {
     name: 'distance',

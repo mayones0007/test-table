@@ -35,8 +35,6 @@ export default {
     }
   },
   name: 'Filters',
-  props: {
-  },
   computed: {
     setFiltersButtonIsDisabled() {
       return !this.filter.column || !this.filter.condition || !this.filter.value
